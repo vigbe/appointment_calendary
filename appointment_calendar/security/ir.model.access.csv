@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_appointment_calendar_type_user,appointment_calendar.type.user,model_appointment_calendar_type,base.group_user,1,1,1,0
+access_appointment_calendar_type_admin,appointment_calendar.type.admin,model_appointment_calendar_type,base.group_system,1,1,1,1
+access_appointment_calendar_slot_user,appointment_calendar.slot.user,model_appointment_calendar_slot,base.group_user,1,1,1,0
+access_appointment_calendar_slot_admin,appointment_calendar.slot.admin,model_appointment_calendar_slot,base.group_system,1,1,1,1
+access_appointment_calendar_type_public,appointment_calendar.type.public,model_appointment_calendar_type,base.group_public,1,0,0,0
