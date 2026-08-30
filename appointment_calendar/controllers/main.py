@@ -1,4 +1,3 @@
-
 import datetime
 
 import pytz
@@ -60,10 +59,12 @@ class AppointmentController(http.Controller):
 
         # Preparamos lista de países Latam (puedes ajustar esta lista)
         # Priorizamos Chile (CL) y luego los más comunes de Latam
-        latam_codes = ['CL', 'AR', 'MX', 'CO', 'PE', 'VE', 'EC', 'BO', 'UY', 'PY', 'BR']
-        countries = request.env['res.country'].sudo().search([('code', 'in', latam_codes)])
+        latam_codes = ["CL", "AR", "MX", "CO", "PE", "VE", "EC", "BO", "UY", "PY", "BR"]
+        countries = (
+            request.env["res.country"].sudo().search([("code", "in", latam_codes)])
+        )
         # Ordenamos para que Chile esté primero si existe
-        countries = sorted(countries, key=lambda c: 0 if c.code == 'CL' else 1)
+        countries = sorted(countries, key=lambda c: 0 if c.code == "CL" else 1)
 
         return request.render(
             "appointment_calendar.appointment_details",
@@ -72,15 +73,28 @@ class AppointmentController(http.Controller):
                 "grouped_slots": grouped_slots,
                 "countries": countries,
                 "days_es": {
-                    'Mon': 'Lun', 'Tue': 'Mar', 'Wed': 'Mié', 'Thu': 'Jue',
-                    'Fri': 'Vie', 'Sat': 'Sáb', 'Sun': 'Dom'
+                    "Mon": "Lun",
+                    "Tue": "Mar",
+                    "Wed": "Mié",
+                    "Thu": "Jue",
+                    "Fri": "Vie",
+                    "Sat": "Sáb",
+                    "Sun": "Dom",
                 },
                 "months_es": {
-                    'January': 'Enero', 'February': 'Febrero', 'March': 'Marzo',
-                    'April': 'Abril', 'May': 'Mayo', 'June': 'Junio',
-                    'July': 'Julio', 'August': 'Agosto', 'September': 'Septiembre',
-                    'October': 'Octubre', 'November': 'Noviembre', 'December': 'Diciembre'
-                }
+                    "January": "Enero",
+                    "February": "Febrero",
+                    "March": "Marzo",
+                    "April": "Abril",
+                    "May": "Mayo",
+                    "June": "Junio",
+                    "July": "Julio",
+                    "August": "Agosto",
+                    "September": "Septiembre",
+                    "October": "Octubre",
+                    "November": "Noviembre",
+                    "December": "Diciembre",
+                },
             },
         )
 
@@ -121,7 +135,9 @@ class AppointmentController(http.Controller):
         utc_end = utc_start + datetime.timedelta(hours=duration)
 
         if not appointment_type._is_slot_available(utc_start, utc_end):
-             return request.redirect(f"/appointment/{appointment_type_id}?error=already_booked")
+            return request.redirect(
+                f"/appointment/{appointment_type_id}?error=already_booked"
+            )
 
         # Create partner if doesn't exist
         partner = (
@@ -136,7 +152,7 @@ class AppointmentController(http.Controller):
                         "name": name,
                         "email": email,
                         "phone": phone,
-                        "vat": rut, # Guardamos el RUT en el campo VAT estándar de Odoo
+                        "vat": rut,  # Guardamos el RUT en el campo VAT estándar de Odoo
                         "country_id": country_id,
                     }
                 )
@@ -145,11 +161,11 @@ class AppointmentController(http.Controller):
             # Si el partner existe, actualizamos datos si faltan
             vals = {}
             if not partner.vat:
-                vals['vat'] = rut
+                vals["vat"] = rut
             if not partner.phone:
-                vals['phone'] = phone
+                vals["phone"] = phone
             if not partner.country_id:
-                vals['country_id'] = country_id
+                vals["country_id"] = country_id
             if vals:
                 partner.write(vals)
 
