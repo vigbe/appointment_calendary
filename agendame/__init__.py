@@ -13,7 +13,7 @@ def _create_default_appointment_types(env):
     Only users belonging to the internal group (base.group_user) get a default
     agenda. Existing agendas are not duplicated.
     """
-    AppointmentType = env["appointment_calendar.type"]
+    AppointmentType = env["agendame.type"]
     group_user = env.ref("base.group_user", raise_if_not_found=False)
     if not group_user:
         return

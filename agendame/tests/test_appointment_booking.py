@@ -15,14 +15,14 @@ class TestAppointmentBooking(TransactionCase):
                 "email": "testuser2@test.com",
             }
         )
-        self.appointment_type = self.env["appointment_calendar.type"].create(
+        self.appointment_type = self.env["agendame.type"].create(
             {
                 "name": "Test Consultation",
                 "appointment_duration": 1.0,
                 "staff_user_ids": [(4, self.user.id)],
             }
         )
-        self.slot = self.env["appointment_calendar.slot"].create(
+        self.slot = self.env["agendame.slot"].create(
             {
                 "appointment_type_id": self.appointment_type.id,
                 "weekday": "1",  # Monday
@@ -231,7 +231,7 @@ class TestAppointmentSecurity(TransactionCase):
     def test_constraint_user_cannot_assign_other_staff(self):
         """A non-admin user cannot create an agenda with someone else on staff."""
         with self.env.with_user(self.user_a), self.assertRaises(ValidationError):
-            self.env["appointment_calendar.type"].create(
+            self.env["agendame.type"].create(
                 {
                     "name": "Agenda de otro",
                     "appointment_duration": 1.0,
@@ -242,7 +242,7 @@ class TestAppointmentSecurity(TransactionCase):
     def test_constraint_user_can_assign_self(self):
         """A non-admin user CAN create an agenda with themselves as staff."""
         with self.env.with_user(self.user_a):
-            agenda = self.env["appointment_calendar.type"].create(
+            agenda = self.env["agendame.type"].create(
                 {
                     "name": "Mi Agenda",
                     "appointment_duration": 1.0,
@@ -253,7 +253,7 @@ class TestAppointmentSecurity(TransactionCase):
     def test_record_rule_user_sees_only_own(self):
         """User A creates an agenda → only visible to A, not B."""
         with self.env.with_user(self.user_a):
-            agenda_a = self.env["appointment_calendar.type"].create(
+            agenda_a = self.env["agendame.type"].create(
                 {
                     "name": "Agenda A",
                     "appointment_duration": 1.0,
@@ -262,7 +262,7 @@ class TestAppointmentSecurity(TransactionCase):
 
         # User B: search should NOT return A's agenda
         with self.env.with_user(self.user_b):
-            visible = self.env["appointment_calendar.type"].search(
+            visible = self.env["agendame.type"].search(
                 [
                     ("id", "=", agenda_a.id),
                 ]
@@ -271,7 +271,7 @@ class TestAppointmentSecurity(TransactionCase):
 
         # User A: search SHOULD return their own agenda
         with self.env.with_user(self.user_a):
-            visible = self.env["appointment_calendar.type"].search(
+            visible = self.env["agendame.type"].search(
                 [
                     ("id", "=", agenda_a.id),
                 ]
@@ -281,14 +281,14 @@ class TestAppointmentSecurity(TransactionCase):
     def test_admin_sees_all_agendas(self):
         """Admin can see agendas from any user."""
         with self.env.with_user(self.user_a):
-            agenda_a = self.env["appointment_calendar.type"].create(
+            agenda_a = self.env["agendame.type"].create(
                 {
                     "name": "Agenda A",
                     "appointment_duration": 1.0,
                 }
             )
         with self.env.with_user(self.user_b):
-            agenda_b = self.env["appointment_calendar.type"].create(
+            agenda_b = self.env["agendame.type"].create(
                 {
                     "name": "Agenda B",
                     "appointment_duration": 1.0,
@@ -296,14 +296,14 @@ class TestAppointmentSecurity(TransactionCase):
             )
 
         with self.env.with_user(self.user_admin):
-            all_visible = self.env["appointment_calendar.type"].search([])
+            all_visible = self.env["agendame.type"].search([])
             self.assertIn(agenda_a, all_visible)
             self.assertIn(agenda_b, all_visible)
 
     def test_admin_can_create_for_others(self):
         """Admin can create an agenda with any staff."""
         with self.env.with_user(self.user_admin):
-            agenda = self.env["appointment_calendar.type"].create(
+            agenda = self.env["agendame.type"].create(
                 {
                     "name": "Agenda Admin",
                     "appointment_duration": 1.0,
@@ -318,7 +318,7 @@ class TestAppointmentSecurity(TransactionCase):
     def test_user_cannot_delete_own_agenda(self):
         """Non-admin users cannot unlink their own agenda (ACL restriction)."""
         with self.env.with_user(self.user_a):
-            agenda = self.env["appointment_calendar.type"].create(
+            agenda = self.env["agendame.type"].create(
                 {
                     "name": "Agenda a borrar",
                     "appointment_duration": 1.0,
@@ -330,7 +330,7 @@ class TestAppointmentSecurity(TransactionCase):
     def test_admin_can_delete_any_agenda(self):
         """Admin can unlink any agenda."""
         with self.env.with_user(self.user_a):
-            agenda = self.env["appointment_calendar.type"].create(
+            agenda = self.env["agendame.type"].create(
                 {
                     "name": "Agenda a borrar por admin",
                     "appointment_duration": 1.0,
@@ -357,14 +357,14 @@ class TestAppointmentEventRestriction(TransactionCase):
 
         # Appointment types created by admin, each with its own staff user.
         with cls.env.with_user(cls.admin):
-            cls.appointment_type_a = cls.env["appointment_calendar.type"].create(
+            cls.appointment_type_a = cls.env["agendame.type"].create(
                 {
                     "name": "Agenda A",
                     "appointment_duration": 1.0,
                     "staff_user_ids": [(4, cls.user_a.id)],
                 }
             )
-            cls.appointment_type_b = cls.env["appointment_calendar.type"].create(
+            cls.appointment_type_b = cls.env["agendame.type"].create(
                 {
                     "name": "Agenda B",
                     "appointment_duration": 1.0,

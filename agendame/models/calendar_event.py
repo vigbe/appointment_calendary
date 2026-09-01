@@ -6,7 +6,7 @@ class CalendarEvent(models.Model):
     _inherit = "calendar.event"
 
     appointment_type_id = fields.Many2one(
-        "appointment_calendar.type", string="Tipo de Cita"
+        "agendame.type", string="Tipo de Cita"
     )
     appointment_status = fields.Selection(
         [

@@ -8,7 +8,7 @@
         -->
         <record id="rule_appointment_type_own" model="ir.rule">
             <field name="name">Appointment Type: own agendas only</field>
-            <field name="model_id" ref="model_appointment_calendar_type"/>
+            <field name="model_id" ref="model_agendame_type"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="domain_force">
                 [("staff_user_ids", "in", user.id)]
@@ -21,7 +21,7 @@
 
         <record id="rule_appointment_type_admin" model="ir.rule">
             <field name="name">Appointment Type: admin full access</field>
-            <field name="model_id" ref="model_appointment_calendar_type"/>
+            <field name="model_id" ref="model_agendame_type"/>
             <field name="groups" eval="[(4, ref('base.group_system'))]"/>
             <field name="domain_force">[(1, "=", 1)]</field>
             <field name="perm_read" eval="True"/>
@@ -33,7 +33,7 @@
         <!-- Slots follow the parent appointment type ownership. -->
         <record id="rule_appointment_slot_own" model="ir.rule">
             <field name="name">Appointment Slot: own type slots only</field>
-            <field name="model_id" ref="model_appointment_calendar_slot"/>
+            <field name="model_id" ref="model_agendame_slot"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="domain_force">
                 [("appointment_type_id.staff_user_ids", "in", user.id)]
@@ -46,7 +46,7 @@
 
         <record id="rule_appointment_slot_admin" model="ir.rule">
             <field name="name">Appointment Slot: admin full access</field>
-            <field name="model_id" ref="model_appointment_calendar_slot"/>
+            <field name="model_id" ref="model_agendame_slot"/>
             <field name="groups" eval="[(4, ref('base.group_system'))]"/>
             <field name="domain_force">[(1, "=", 1)]</field>
             <field name="perm_read" eval="True"/>
