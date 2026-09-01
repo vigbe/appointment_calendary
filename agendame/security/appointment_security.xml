@@ -36,7 +36,7 @@
             <field name="model_id" ref="model_agendame_slot"/>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="domain_force">
-                [("appointment_type_id.staff_user_ids", "in", user.id)]
+                [("agendame_type_id.staff_user_ids", "in", user.id)]
             </field>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="True"/>

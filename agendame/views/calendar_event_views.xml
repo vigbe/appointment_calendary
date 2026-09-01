@@ -6,8 +6,8 @@
         <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='location']" position="after">
-                <field name="appointment_type_id"/>
-                <field name="appointment_status"/>
+                <field name="agendame_type_id"/>
+                <field name="agendame_status"/>
             </xpath>
         </field>
     </record>
