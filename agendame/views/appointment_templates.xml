@@ -83,7 +83,7 @@
                                                 </span>
                                             </div>
                                             <div class="mt-auto">
-                                                <a t-attf-href="/appointment/#{app_type.id}" class="btn btn-lg d-block text-decoration-none fw-bold text-white" t-att-style="'background-color: %s; border-radius: 12px; padding: 12px 30px;' % (app_type.color_primary or '#714B67')">
+                                                <a t-attf-href="/agendame/#{app_type.id}" class="btn btn-lg d-block text-decoration-none fw-bold text-white" t-att-style="'background-color: %s; border-radius: 12px; padding: 12px 30px;' % (app_type.color_primary or '#714B67')">
                                                     Agendar Ahora
                                                 </a>
                                             </div>
@@ -170,7 +170,7 @@
                             <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
                                 <div class="row g-0">
                                     <div class="col-md-4 text-white p-5 d-flex flex-column" t-att-style="'background-color: %s; position: relative;' % (appointment_type.color_secondary or '#212529')">
-                                        <a href="/appointment" class="text-white-50 mb-5 d-inline-block text-decoration-none h5" style="z-index: 2;"><i class="fa fa-chevron-left me-2"/> Volver</a>
+                                        <a href="/agendame" class="text-white-50 mb-5 d-inline-block text-decoration-none h5" style="z-index: 2;"><i class="fa fa-chevron-left me-2"/> Volver</a>
                                         
                                         <div class="mb-5 text-center" style="z-index: 2;">
                                             <t t-if="appointment_type.image_1920">
@@ -201,9 +201,9 @@
                                         </div>
                                     </div>
                                     <div class="col-md-8 p-5">
-                                        <form action="/appointment/submit" method="post" id="appointment_form">
+                                        <form action="/agendame/submit" method="post" id="appointment_form">
                                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                            <input type="hidden" name="appointment_type_id" t-att-value="appointment_type.id"/>
+                                            <input type="hidden" name="agendame_type_id" t-att-value="appointment_type.id"/>
                                             <input type="hidden" name="date" id="selected_date"/>
 
                                             <div id="step_1">

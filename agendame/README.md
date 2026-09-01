@@ -4,7 +4,7 @@ Addon para Odoo que agrega una página pública de reservas a tu sitio web: los 
 
 ## Qué hace
 
-- Agrega la ruta pública `/appointment` a tu sitio web con la lista de tipos de cita activos.
+- Agrega la ruta pública `/agendame` a tu sitio web con la lista de tipos de cita activos.
 - Cada tipo de cita tiene su propia página con los horarios disponibles calculados en tiempo real.
 - La disponibilidad se calcula a partir de franjas horarias por día de la semana y de los calendarios reales de los usuarios asignados (detección de conflictos con una única consulta optimizada).
 - Al reservar, se crea o actualiza automáticamente el contacto (nombre, email, teléfono, RUT/VAT y país).
@@ -41,7 +41,7 @@ Addon para Odoo que agrega una página pública de reservas a tu sitio web: los 
 ## Uso
 
 1. Ve a **Calendario → Citas → Tipos de Cita** y ajusta horarios, duración y personal asignado.
-2. Comparte la URL de reserva (`/appointment`) o el enlace específico de cada tipo de cita.
+2. Comparte la URL de reserva (`/agendame`) o el enlace específico de cada tipo de cita.
 3. El visitante elige el tipo de cita, completa sus datos (nombre, email, teléfono, RUT y país) y selecciona un horario disponible.
 4. La cita queda creada en el calendario de Odoo con el estado *Reservada*.
 
@@ -49,14 +49,14 @@ Addon para Odoo que agrega una página pública de reservas a tu sitio web: los 
 
 - `__manifest__.py` — definición del addon.
 - `__init__.py` — post_init_hook que provisiona agendas por defecto.
-- `models/appointment_type.py` — modelo principal: tipos de cita y generación de horarios disponibles.
-- `models/appointment_slot.py` — franjas horarias de disponibilidad por día de la semana.
+- `models/agendame_type.py` — modelo principal: tipos de cita y generación de horarios disponibles.
+- `models/agendame_slot.py` — franjas horarias de disponibilidad por día de la semana.
 - `models/calendar_event.py` — extensión del evento de calendario y restricciones de propiedad.
 - `models/crm_lead.py` — integración con oportunidades CRM (enlace de reserva).
 - `models/res_users.py` — agenda por defecto para usuarios internos nuevos.
 - `controllers/main.py` — controlador del sitio público de reservas.
-- `views/appointment_type_views.xml` — vistas backend (formulario/lista) y menú.
-- `views/appointment_templates.xml` — plantillas QWeb del portal público.
+- `views/agendame_type_views.xml` — vistas backend (formulario/lista) y menú.
+- `views/agendame_templates.xml` — plantillas QWeb del portal público.
 - `views/calendar_event_views.xml` — herencia de la vista de calendario.
 - `views/crm_lead_views_inherit.xml` — herencia de la vista de oportunidad.
 - `security/` — reglas de registro y permisos de acceso.

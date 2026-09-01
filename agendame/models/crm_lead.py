@@ -4,18 +4,18 @@ from odoo import api, fields, models
 class CrmLead(models.Model):
     _inherit = "crm.lead"
 
-    appointment_type_id = fields.Many2one(
+    agendame_type_id = fields.Many2one(
         "agendame.type", string="Tipo de Cita para Reserva"
     )
     booking_link = fields.Char(
         string="Enlace de Reserva", compute="_compute_booking_link"
     )
 
-    @api.depends("appointment_type_id")
+    @api.depends("agendame_type_id")
     def _compute_booking_link(self):
         for lead in self:
-            if lead.appointment_type_id:
-                lead.booking_link = lead.appointment_type_id.booking_url
+            if lead.agendame_type_id:
+                lead.booking_link = lead.agendame_type_id.booking_url
             else:
                 lead.booking_link = False
 

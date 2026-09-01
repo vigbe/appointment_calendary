@@ -5,7 +5,7 @@ class AppointmentSlot(models.Model):
     _name = "agendame.slot"
     _description = "Horario de Cita"
 
-    appointment_type_id = fields.Many2one(
+    agendame_type_id = fields.Many2one(
         "agendame.type",
         string="Tipo de Cita",
         ondelete="cascade",

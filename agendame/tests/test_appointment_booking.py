@@ -24,7 +24,7 @@ class TestAppointmentBooking(TransactionCase):
         )
         self.slot = self.env["agendame.slot"].create(
             {
-                "appointment_type_id": self.appointment_type.id,
+                "agendame_type_id": self.appointment_type.id,
                 "weekday": "1",  # Monday
                 "start_hour": 9.0,
                 "end_hour": 17.0,
@@ -343,7 +343,7 @@ class TestAppointmentSecurity(TransactionCase):
 
 class TestAppointmentEventRestriction(TransactionCase):
     """A non-admin user can only create/edit module appointments (calendar.event
-    with appointment_type_id) that involve themselves, and cannot modify an
+    with agendame_type_id) that involve themselves, and cannot modify an
     appointment owned by another user even if they are an attendee."""
 
     @classmethod
@@ -377,7 +377,7 @@ class TestAppointmentEventRestriction(TransactionCase):
             "name": "Cita",
             "start": datetime.datetime(2023, 10, 23, 10, 0, 0),
             "stop": datetime.datetime(2023, 10, 23, 11, 0, 0),
-            "appointment_type_id": appt_type.id,
+            "agendame_type_id": appt_type.id,
         }
 
     def test_user_can_create_own_appointment(self):
@@ -436,7 +436,7 @@ class TestAppointmentEventRestriction(TransactionCase):
                     "name": "Cita de B",
                     "start": datetime.datetime(2023, 10, 23, 10, 0, 0),
                     "stop": datetime.datetime(2023, 10, 23, 11, 0, 0),
-                    "appointment_type_id": self.appointment_type_b.id,
+                    "agendame_type_id": self.appointment_type_b.id,
                     "user_id": self.user_b.id,
                     "partner_ids": [(4, self.user_a.partner_id.id)],  # a is attendee
                 }
