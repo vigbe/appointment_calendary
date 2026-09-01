@@ -9,7 +9,7 @@ class ResUsers(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
-        AppointmentType = self.env["appointment_calendar.type"]
+        AppointmentType = self.env["agendame.type"]
         for user in users:
             # Only internal users (base.group_user) get a default agenda.
             if not user.active:

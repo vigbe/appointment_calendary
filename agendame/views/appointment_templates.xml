@@ -41,10 +41,10 @@
                             <div class="mb-4">
                                 <t t-set="first_type" t-value="appointment_types[:1]"/>
                                 <t t-if="first_type and first_type.image_1920">
-                                    <img t-attf-src="/web/image/appointment_calendar.type/#{first_type[0].id}/image_1920" class="rounded-circle shadow-lg" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid white;"/>
+                                    <img t-attf-src="/web/image/agendame.type/#{first_type[0].id}/image_1920" class="rounded-circle shadow-lg" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid white;"/>
                                 </t>
                                 <t t-else="">
-                                    <img src="/appointment_calendar/static/description/icon.png" class="rounded-circle shadow-lg" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid white;"/>
+                                    <img src="/agendame/static/description/icon.png" class="rounded-circle shadow-lg" style="width: 100px; height: 100px; object-fit: cover; border: 4px solid white;"/>
                                 </t>
                             </div>
                             <h1 class="display-3 fw-bold mb-3 lux-gradient-text">
@@ -59,7 +59,7 @@
                                             <div class="card-body d-flex flex-column text-center">
                                                 <div class="mb-4">
                                                     <t t-if="app_type.image_1920">
-                                                        <img t-attf-src="/web/image/appointment_calendar.type/#{app_type.id}/image_1920" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;"/>
+                                                        <img t-attf-src="/web/image/agendame.type/#{app_type.id}/image_1920" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;"/>
                                                     </t>
                                                     <t t-else="">
                                                         <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-light" style="width: 80px; height: 80px; background-color: #f8f9fa;">
@@ -174,7 +174,7 @@
                                         
                                         <div class="mb-5 text-center" style="z-index: 2;">
                                             <t t-if="appointment_type.image_1920">
-                                                <img t-attf-src="/web/image/appointment_calendar.type/#{appointment_type.id}/image_1920" class="rounded-circle shadow-lg mb-4" style="width: 150px; height: 150px; object-fit: cover; border: 4px solid white;"/>
+                                                <img t-attf-src="/web/image/agendame.type/#{appointment_type.id}/image_1920" class="rounded-circle shadow-lg mb-4" style="width: 150px; height: 150px; object-fit: cover; border: 4px solid white;"/>
                                             </t>
                                             <t t-elif="appointment_type.staff_user_ids">
                                                 <t t-set="main_staff" t-value="appointment_type.staff_user_ids[0]"/>

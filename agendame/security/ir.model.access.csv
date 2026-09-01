@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_agendame_type_user,agendame.type.user,model_agendame_type,base.group_user,1,1,1,0
+access_agendame_type_admin,agendame.type.admin,model_agendame_type,base.group_system,1,1,1,1
+access_agendame_slot_user,agendame.slot.user,model_agendame_slot,base.group_user,1,1,1,0
+access_agendame_slot_admin,agendame.slot.admin,model_agendame_slot,base.group_system,1,1,1,1
+access_agendame_type_public,agendame.type.public,model_agendame_type,base.group_public,1,0,0,0
