@@ -20,10 +20,10 @@
     "depends": ["base", "crm", "calendar", "website", "mail"],
     "data": [
         "security/ir.model.access.csv",
-        "security/appointment_security.xml",
-        "views/appointment_type_views.xml",
+        "security/agendame_security.xml",
+        "views/agendame_type_views.xml",
         "views/calendar_event_views.xml",
-        "views/appointment_templates.xml",
+        "views/agendame_templates.xml",
         "views/crm_lead_views_inherit.xml",
     ],
     "images": [

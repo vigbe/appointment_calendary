@@ -5,10 +5,10 @@ from odoo.exceptions import UserError, ValidationError
 class CalendarEvent(models.Model):
     _inherit = "calendar.event"
 
-    appointment_type_id = fields.Many2one(
+    agendame_type_id = fields.Many2one(
         "agendame.type", string="Tipo de Cita"
     )
-    appointment_status = fields.Selection(
+    agendame_status = fields.Selection(
         [
             ("request", "Solicitud"),
             ("booked", "Reservada"),
@@ -34,7 +34,7 @@ class CalendarEvent(models.Model):
     # administradores (base.group_system) estan exentos, por lo que el
     # booking web no se ve afectado.
     # ------------------------------------------------------------------
-    @api.constrains("user_id", "partner_ids", "appointment_type_id")
+    @api.constrains("user_id", "partner_ids", "agendame_type_id")
     def _check_appointment_self_only(self):
         if self.env.su or self.env.user.has_group("base.group_system"):
             return
@@ -42,7 +42,7 @@ class CalendarEvent(models.Model):
         own_partner = user.partner_id
         for event in self:
             # Solo aplica a las citas de este modulo
-            if not event.appointment_type_id:
+            if not event.agendame_type_id:
                 continue
             # El organizador debe ser el propio usuario (o quedar vacio)
             if event.user_id and event.user_id != user:
@@ -70,7 +70,7 @@ class CalendarEvent(models.Model):
             return
         user = self.env.user
         for event in self:
-            if not event.appointment_type_id:
+            if not event.agendame_type_id:
                 continue
             if event.user_id and event.user_id != user:
                 raise UserError(

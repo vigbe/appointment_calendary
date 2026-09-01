@@ -26,7 +26,7 @@ each one carries the view syntax of its Odoo series.
    into a directory listed in your `addons_path`:
 
    ```bash
-   git clone -b 19.0 https://github.com/vigbe/appointment_calendary.git
+   git clone -b 19.0 https://github.com/vigbe/agendame_calendary.git
    ```
 
 2. Restart Odoo and update the Apps list.
@@ -39,7 +39,7 @@ Dependencies: `crm`, `calendar`, `website`, `mail`.
 
 1. Go to **Calendar → Appointments → Appointment Types** and configure
    duration, timezone, staff users and weekday availability.
-2. Share the public booking URL (`/appointment`) with your customers.
+2. Share the public booking URL (`/agendame`) with your customers.
 3. Visitors fill in their details and pick a free slot; availability adapts
    to each staff member's real calendar.
 

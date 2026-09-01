@@ -24,7 +24,7 @@ class AppointmentType(models.Model):
     )
     slot_ids = fields.One2many(
         "agendame.slot",
-        "appointment_type_id",
+        "agendame_type_id",
         string="Horarios Disponibles",
     )
     appointment_tz = fields.Selection(
@@ -159,7 +159,7 @@ class AppointmentType(models.Model):
     def _compute_booking_url(self):
         base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
         for app_type in self:
-            app_type.booking_url = f"{base_url}/appointment/{app_type.id}"
+            app_type.booking_url = f"{base_url}/agendame/{app_type.id}"
 
     def _get_appointment_slots(self, reference_date=None):
         """
