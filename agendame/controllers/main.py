@@ -14,9 +14,7 @@ class AppointmentController(http.Controller):
         if request.env.user.has_group("base.group_user"):
             appointment_types = request.env["agendame.type"].search(domain)
         else:
-            appointment_types = (
-                request.env["agendame.type"].sudo().search(domain)
-            )
+            appointment_types = request.env["agendame.type"].sudo().search(domain)
         return request.render(
             "agendame.appointments_list",
             {
@@ -32,14 +30,10 @@ class AppointmentController(http.Controller):
     )
     def appointment_page(self, agendame_type_id, **kwargs):
         if request.env.user.has_group("base.group_user"):
-            appointment_type = request.env["agendame.type"].browse(
-                agendame_type_id
-            )
+            appointment_type = request.env["agendame.type"].browse(agendame_type_id)
         else:
             appointment_type = (
-                request.env["agendame.type"]
-                .sudo()
-                .browse(agendame_type_id)
+                request.env["agendame.type"].sudo().browse(agendame_type_id)
             )
         if not appointment_type.exists():
             return request.not_found()
@@ -118,9 +112,7 @@ class AppointmentController(http.Controller):
         if not date_str:
             return request.redirect(f"/agendame/{agendame_type_id}?error=no_date")
 
-        appointment_type = (
-            request.env["agendame.type"].sudo().browse(agendame_type_id)
-        )
+        appointment_type = request.env["agendame.type"].sudo().browse(agendame_type_id)
 
         # Convert submitted date back to UTC
         appt_tz = pytz.timezone(appointment_type.appointment_tz or "UTC")

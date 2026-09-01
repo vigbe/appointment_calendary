@@ -5,9 +5,7 @@ from odoo.exceptions import UserError, ValidationError
 class CalendarEvent(models.Model):
     _inherit = "calendar.event"
 
-    agendame_type_id = fields.Many2one(
-        "agendame.type", string="Tipo de Cita"
-    )
+    agendame_type_id = fields.Many2one("agendame.type", string="Tipo de Cita")
     agendame_status = fields.Selection(
         [
             ("request", "Solicitud"),
