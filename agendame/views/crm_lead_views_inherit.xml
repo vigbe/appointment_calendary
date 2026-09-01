@@ -10,12 +10,12 @@
                         string="Enviar Enlace de Cita" 
                         type="object" 
                         class="oe_highlight"
-                        attrs="{'invisible': [('appointment_type_id', '=', False)]}"/>
+                        attrs="{'invisible': [('agendame_type_id', '=', False)]}"/>
             </xpath>
             <xpath expr="//group[@name='lead_info']" position="inside">
                 <group string="Reserva de Cita">
-                    <field name="appointment_type_id" options="{'no_create': True}"/>
-                    <field name="booking_link" widget="url" attrs="{'invisible': [('appointment_type_id', '=', False)]}"/>
+                    <field name="agendame_type_id" options="{'no_create': True}"/>
+                    <field name="booking_link" widget="url" attrs="{'invisible': [('agendame_type_id', '=', False)]}"/>
                 </group>
             </xpath>
         </field>

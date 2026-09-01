@@ -6,7 +6,7 @@ from odoo.http import request
 
 
 class AppointmentController(http.Controller):
-    @http.route("/appointment", type="http", auth="public", website=True)
+    @http.route("/agendame", type="http", auth="public", website=True)
     def appointment_index(self, **kwargs):
         domain = [("active", "=", True)]
         # Authenticated internal users see only their own agendas
@@ -25,21 +25,21 @@ class AppointmentController(http.Controller):
         )
 
     @http.route(
-        "/appointment/<int:appointment_type_id>",
+        "/agendame/<int:agendame_type_id>",
         type="http",
         auth="public",
         website=True,
     )
-    def appointment_page(self, appointment_type_id, **kwargs):
+    def appointment_page(self, agendame_type_id, **kwargs):
         if request.env.user.has_group("base.group_user"):
             appointment_type = request.env["agendame.type"].browse(
-                appointment_type_id
+                agendame_type_id
             )
         else:
             appointment_type = (
                 request.env["agendame.type"]
                 .sudo()
-                .browse(appointment_type_id)
+                .browse(agendame_type_id)
             )
         if not appointment_type.exists():
             return request.not_found()
@@ -99,7 +99,7 @@ class AppointmentController(http.Controller):
         )
 
     @http.route(
-        "/appointment/submit",
+        "/agendame/submit",
         type="http",
         auth="public",
         methods=["POST"],
@@ -107,7 +107,7 @@ class AppointmentController(http.Controller):
         csrf=True,
     )
     def appointment_submit(self, **post):
-        appointment_type_id = int(post.get("appointment_type_id"))
+        agendame_type_id = int(post.get("agendame_type_id"))
         name = post.get("name")
         email = post.get("email")
         phone = post.get("phone")
@@ -116,10 +116,10 @@ class AppointmentController(http.Controller):
         date_str = post.get("date")  # Expected: '2023-10-27 10:00:00' (in appt_tz)
 
         if not date_str:
-            return request.redirect(f"/appointment/{appointment_type_id}?error=no_date")
+            return request.redirect(f"/agendame/{agendame_type_id}?error=no_date")
 
         appointment_type = (
-            request.env["agendame.type"].sudo().browse(appointment_type_id)
+            request.env["agendame.type"].sudo().browse(agendame_type_id)
         )
 
         # Convert submitted date back to UTC
@@ -136,7 +136,7 @@ class AppointmentController(http.Controller):
 
         if not appointment_type._is_slot_available(utc_start, utc_end):
             return request.redirect(
-                f"/appointment/{appointment_type_id}?error=already_booked"
+                f"/agendame/{agendame_type_id}?error=already_booked"
             )
 
         # Create partner if doesn't exist
@@ -184,8 +184,8 @@ class AppointmentController(http.Controller):
                     "start": utc_start,
                     "stop": utc_end,
                     "partner_ids": partner_ids,
-                    "appointment_type_id": appointment_type.id,
-                    "appointment_status": "booked",
+                    "agendame_type_id": appointment_type.id,
+                    "agendame_status": "booked",
                     "videocall_source": appointment_type.event_videocall_source,
                     "client_rut": rut,
                     "client_country_id": country_id,
