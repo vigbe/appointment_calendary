@@ -32,7 +32,7 @@ Addon para Odoo que agrega una página pública de reservas a tu sitio web: los 
 
 ## Instalación
 
-1. Copia el addon `appointment_calendar` a tu carpeta de addons de Odoo.
+1. Copia el addon `agendame` a tu carpeta de addons de Odoo.
 2. Asegúrate de que Odoo pueda encontrar la ruta: agrega el directorio al `addons_path` si es necesario.
 3. Reinicia el servidor de Odoo.
 4. Actualiza la lista de aplicaciones y encuentra el addon **Agendame - Appointment Booking**.

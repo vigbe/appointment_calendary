@@ -12,13 +12,13 @@ class AppointmentController(http.Controller):
         # Authenticated internal users see only their own agendas
         # (Odoo record rules enforce this). Public visitors see all.
         if request.env.user.has_group("base.group_user"):
-            appointment_types = request.env["appointment_calendar.type"].search(domain)
+            appointment_types = request.env["agendame.type"].search(domain)
         else:
             appointment_types = (
-                request.env["appointment_calendar.type"].sudo().search(domain)
+                request.env["agendame.type"].sudo().search(domain)
             )
         return request.render(
-            "appointment_calendar.appointments_list",
+            "agendame.appointments_list",
             {
                 "appointment_types": appointment_types,
             },
@@ -32,12 +32,12 @@ class AppointmentController(http.Controller):
     )
     def appointment_page(self, appointment_type_id, **kwargs):
         if request.env.user.has_group("base.group_user"):
-            appointment_type = request.env["appointment_calendar.type"].browse(
+            appointment_type = request.env["agendame.type"].browse(
                 appointment_type_id
             )
         else:
             appointment_type = (
-                request.env["appointment_calendar.type"]
+                request.env["agendame.type"]
                 .sudo()
                 .browse(appointment_type_id)
             )
@@ -67,7 +67,7 @@ class AppointmentController(http.Controller):
         countries = sorted(countries, key=lambda c: 0 if c.code == "CL" else 1)
 
         return request.render(
-            "appointment_calendar.appointment_details",
+            "agendame.appointment_details",
             {
                 "appointment_type": appointment_type,
                 "grouped_slots": grouped_slots,
@@ -119,7 +119,7 @@ class AppointmentController(http.Controller):
             return request.redirect(f"/appointment/{appointment_type_id}?error=no_date")
 
         appointment_type = (
-            request.env["appointment_calendar.type"].sudo().browse(appointment_type_id)
+            request.env["agendame.type"].sudo().browse(appointment_type_id)
         )
 
         # Convert submitted date back to UTC
@@ -194,7 +194,7 @@ class AppointmentController(http.Controller):
         )
 
         return request.render(
-            "appointment_calendar.appointment_thanks",
+            "agendame.appointment_thanks",
             {
                 "event": event,
             },

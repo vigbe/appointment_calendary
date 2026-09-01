@@ -9,7 +9,7 @@ from odoo.fields import Command
 
 
 class AppointmentType(models.Model):
-    _name = "appointment_calendar.type"
+    _name = "agendame.type"
     _description = "Tipo de Cita"
     _inherit = ["mail.thread", "mail.activity.mixin"]
 
@@ -23,7 +23,7 @@ class AppointmentType(models.Model):
         default=lambda self: [Command.set(self.env.user.ids)],
     )
     slot_ids = fields.One2many(
-        "appointment_calendar.slot",
+        "agendame.slot",
         "appointment_type_id",
         string="Horarios Disponibles",
     )
@@ -106,7 +106,7 @@ class AppointmentType(models.Model):
         It is skipped if the user already has an assigned agenda.
         """
         if not user:
-            return self.env["appointment_calendar.type"]
+            return self.env["agendame.type"]
         existing = self.search([("staff_user_ids", "in", user.id)], limit=1)
         if existing:
             return existing

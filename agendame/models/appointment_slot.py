@@ -2,11 +2,11 @@ from odoo import fields, models
 
 
 class AppointmentSlot(models.Model):
-    _name = "appointment_calendar.slot"
+    _name = "agendame.slot"
     _description = "Horario de Cita"
 
     appointment_type_id = fields.Many2one(
-        "appointment_calendar.type",
+        "agendame.type",
         string="Tipo de Cita",
         ondelete="cascade",
         required=True,
