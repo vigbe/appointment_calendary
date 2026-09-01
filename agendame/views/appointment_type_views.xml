@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="appointment_type_view_form" model="ir.ui.view">
-        <field name="name">appointment_calendar.type.view.form</field>
-        <field name="model">appointment_calendar.type</field>
+        <field name="name">agendame.type.view.form</field>
+        <field name="model">agendame.type</field>
         <field name="arch" type="xml">
             <form string="Tipo de Cita">
                 <sheet>
@@ -48,8 +48,8 @@
     </record>
 
     <record id="appointment_type_view_list" model="ir.ui.view">
-        <field name="name">appointment_calendar.type.view.list</field>
-        <field name="model">appointment_calendar.type</field>
+        <field name="name">agendame.type.view.list</field>
+        <field name="model">agendame.type</field>
         <field name="arch" type="xml">
             <list string="Tipos de Cita">
                 <field name="name"/>
@@ -61,7 +61,7 @@
 
     <record id="appointment_type_action" model="ir.actions.act_window">
         <field name="name">Tipos de Cita</field>
-        <field name="res_model">appointment_calendar.type</field>
+        <field name="res_model">agendame.type</field>
         <field name="view_mode">list,form</field>
     </record>
 

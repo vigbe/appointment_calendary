@@ -12,7 +12,7 @@ required.
 | Branch | Odoo series | Notes |
 |--------|-------------|-------|
 | `main` | 19.0 | Default branch, identical to `19.0` |
-| `19.0` | 19.0 | Version continuity with internal history (19.0.2.3.0) |
+| `19.0` | 19.0 | First public release (19.0.1.0.0) |
 | `18.0` | 18.0 | First public port (18.0.1.0.0) |
 | `17.0` | 17.0 | First public port (17.0.1.0.0) |
 | `16.0` | 16.0 | First public port (16.0.1.0.0) |
@@ -31,7 +31,7 @@ each one carries the view syntax of its Odoo series.
 
 2. Restart Odoo and update the Apps list.
 3. Install **Agendame - Appointment Booking** (technical name:
-   `appointment_calendar`).
+   `agendame`).
 
 Dependencies: `crm`, `calendar`, `website`, `mail`.
 
@@ -43,7 +43,7 @@ Dependencies: `crm`, `calendar`, `website`, `mail`.
 3. Visitors fill in their details and pick a free slot; availability adapts
    to each staff member's real calendar.
 
-Full (Spanish) module documentation: [`appointment_calendar/README.md`](appointment_calendar/README.md).
+Full (Spanish) module documentation: [`agendame/README.md`](agendame/README.md).
 
 ## License
 

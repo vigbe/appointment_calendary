@@ -5,7 +5,7 @@ class CrmLead(models.Model):
     _inherit = "crm.lead"
 
     appointment_type_id = fields.Many2one(
-        "appointment_calendar.type", string="Tipo de Cita para Reserva"
+        "agendame.type", string="Tipo de Cita para Reserva"
     )
     booking_link = fields.Char(
         string="Enlace de Reserva", compute="_compute_booking_link"

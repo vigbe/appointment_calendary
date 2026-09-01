@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
     <record id="calendar_event_view_form_inherit_appointment" model="ir.ui.view">
-        <field name="name">calendar.event.view.form.inherit.appointment_calendar</field>
+        <field name="name">calendar.event.view.form.inherit.agendame</field>
         <field name="model">calendar.event</field>
         <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
         <field name="arch" type="xml">
