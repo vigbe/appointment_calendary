@@ -259,6 +259,21 @@ class AppointmentType(models.Model):
 
         return sorted(set(available_slots))
 
+    def _is_offered_slot(self, utc_start, reference_date=None):
+        """
+        Return True when ``utc_start`` (naive UTC datetime) is a member of
+        the slot grid this type offers: right weekday, inside the
+        configured hours, aligned to the duration, and within
+        max_schedule_days from ``reference_date`` (defaults to today).
+
+        Reuses _get_appointment_slots so the submit-side validation can
+        never drift from the grid shown to visitors.
+        """
+        self.ensure_one()
+        if reference_date is None:
+            reference_date = fields.Date.today()
+        return utc_start in self._get_appointment_slots(reference_date=reference_date)
+
     def _is_slot_available_fast(self, start_dt, end_dt, partner_ids, busy_by_partner):
         """
         Check slot availability using pre-fetched busy periods.
@@ -281,26 +296,45 @@ class AppointmentType(models.Model):
 
     def _is_slot_available(self, start_dt, end_dt):
         """
-        Check if any of the staff users are free in this time range.
-        DEPRECATED: Use _get_appointment_slots which uses optimized batch checking.
-        Kept for backward compatibility.
+        Check if at least one staff user is free in this time range.
+
+        Uses the same ANY-staff-free semantics as _is_slot_available_fast
+        and _get_appointment_slots, so any slot offered on the public
+        page is actually bookable even with several staff members.
         """
         self.ensure_one()
         if not self.staff_user_ids:
             return True
 
         partner_ids = self.staff_user_ids.mapped("partner_id").ids
-        overlapping_event = (
+        busy_events = (
             self.env["calendar.event"]
             .sudo()
-            .search(
+            .search_read(
                 [
                     ("partner_ids", "in", partner_ids),
                     ("start", "<", fields.Datetime.to_string(end_dt)),
                     ("stop", ">", fields.Datetime.to_string(start_dt)),
                 ],
-                limit=1,
+                ["start", "stop", "partner_ids"],
             )
         )
+        busy_by_partner = {pid: [] for pid in partner_ids}
+        for event in busy_events:
+            event_start = (
+                fields.Datetime.from_string(event["start"])
+                if isinstance(event["start"], str)
+                else event["start"]
+            )
+            event_stop = (
+                fields.Datetime.from_string(event["stop"])
+                if isinstance(event["stop"], str)
+                else event["stop"]
+            )
+            for pid in event["partner_ids"]:
+                if pid in busy_by_partner:
+                    busy_by_partner[pid].append((event_start, event_stop))
 
-        return not overlapping_event
+        return self._is_slot_available_fast(
+            start_dt, end_dt, partner_ids, busy_by_partner
+        )

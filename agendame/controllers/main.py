@@ -1,7 +1,7 @@
 import datetime
 
 import pytz
-from odoo import http
+from odoo import fields, http
 from odoo.http import request
 
 
@@ -101,31 +101,90 @@ class AppointmentController(http.Controller):
         csrf=True,
     )
     def appointment_submit(self, **post):
-        agendame_type_id = int(post.get("agendame_type_id"))
-        name = post.get("name")
-        email = post.get("email")
-        phone = post.get("phone")
-        rut = post.get("rut")
-        country_id = int(post.get("country_id")) if post.get("country_id") else False
-        date_str = post.get("date")  # Expected: '2023-10-27 10:00:00' (in appt_tz)
+        # --- Defensive input validation ---
+        # Public POST endpoint: never trust the payload. Any missing or
+        # malformed value redirects back with an ?error= code instead of
+        # raising an unhandled HTTP 500.
+        def _int_or_none(raw):
+            try:
+                return int(str(raw).strip())
+            except (TypeError, ValueError):
+                return None
 
+        agendame_type_id = _int_or_none(post.get("agendame_type_id"))
+        if not agendame_type_id:
+            return request.redirect("/agendame?error=invalid_type")
+
+        name = (post.get("name") or "").strip()
+        if not name:
+            return request.redirect(f"/agendame/{agendame_type_id}?error=missing_name")
+
+        email = (post.get("email") or "").strip()
+        if not email:
+            # An empty email must never reach the partner search: it
+            # would match existing partners whose email is empty.
+            return request.redirect(f"/agendame/{agendame_type_id}?error=missing_email")
+
+        country_id = False
+        raw_country_id = (post.get("country_id") or "").strip()
+        if raw_country_id:
+            country_id = _int_or_none(raw_country_id)
+            if not country_id or not (
+                request.env["res.country"].sudo().browse(country_id).exists()
+            ):
+                return request.redirect(
+                    f"/agendame/{agendame_type_id}?error=invalid_country"
+                )
+
+        phone = (post.get("phone") or "").strip()
+        rut = (post.get("rut") or "").strip()
+
+        date_str = (
+            post.get("date") or ""
+        ).strip()  # '2023-10-27 10:00:00' (in appt_tz)
         if not date_str:
             return request.redirect(f"/agendame/{agendame_type_id}?error=no_date")
 
         appointment_type = request.env["agendame.type"].sudo().browse(agendame_type_id)
+        if not appointment_type.exists():
+            return request.not_found()
+        if not appointment_type.active:
+            # Archived agendas must not stay bookable via direct URL
+            return request.not_found()
 
         # Convert submitted date back to UTC
         appt_tz = pytz.timezone(appointment_type.appointment_tz or "UTC")
-        local_start = appt_tz.localize(
-            datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
-        )
+        try:
+            local_start = appt_tz.localize(
+                datetime.datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+            )
+        except ValueError:
+            return request.redirect(f"/agendame/{agendame_type_id}?error=invalid_date")
         utc_start = local_start.astimezone(pytz.UTC).replace(tzinfo=None)
 
-        # --- RACE CONDITION PROTECTION ---
-        # Re-verify availability before creating the event
         duration = appointment_type.appointment_duration
         utc_end = utc_start + datetime.timedelta(hours=duration)
 
+        # The requested slot must actually be bookable: in the future and
+        # a member of the grid this type offers (weekday, configured
+        # hours, duration alignment, max_schedule_days). Reuses the
+        # model's availability math instead of duplicating timezone
+        # logic in the controller.
+        if utc_start <= fields.Datetime.now():
+            return request.redirect(f"/agendame/{agendame_type_id}?error=past_slot")
+        if not appointment_type._is_offered_slot(utc_start):
+            return request.redirect(f"/agendame/{agendame_type_id}?error=invalid_slot")
+
+        # --- RACE CONDITION PROTECTION (TOCTOU) ---
+        # Pessimistic row lock on the appointment type: the availability
+        # re-check + event creation below run as a serialized critical
+        # section, so two concurrent submissions for the last free staff
+        # member cannot both pass.
+        request.env.cr.execute(
+            "SELECT id FROM agendame_type WHERE id = %s FOR UPDATE",
+            [appointment_type.id],
+        )
+        # Re-verify availability inside the guarded section
         if not appointment_type._is_slot_available(utc_start, utc_end):
             return request.redirect(
                 f"/agendame/{agendame_type_id}?error=already_booked"

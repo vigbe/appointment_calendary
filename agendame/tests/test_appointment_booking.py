@@ -212,6 +212,102 @@ class TestAppointmentBooking(TransactionCase):
         slot_hours = [s.hour for s in monday_slots]
         self.assertNotIn(10, slot_hours, "10:00 slot should be excluded")
 
+    def test_is_offered_slot_membership(self):
+        """_is_offered_slot accepts only grid-aligned slots inside the window."""
+        ref_date = datetime.date(2023, 10, 23)  # Monday
+        # Grid-aligned Monday slot -> offered
+        self.assertTrue(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 23, 10, 0, 0), reference_date=ref_date
+            )
+        )
+        # Misaligned minutes -> not part of the grid
+        self.assertFalse(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 23, 10, 30, 0), reference_date=ref_date
+            )
+        )
+        # Tuesday has no configured slot
+        self.assertFalse(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 24, 10, 0, 0), reference_date=ref_date
+            )
+        )
+        # Before the scheduling window
+        self.assertFalse(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 16, 10, 0, 0), reference_date=ref_date
+            )
+        )
+        # Beyond max_schedule_days (default 7 -> last day is ref + 6)
+        self.assertFalse(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 30, 10, 0, 0), reference_date=ref_date
+            )
+        )
+        # Outside configured hours (9:00-17:00)
+        self.assertFalse(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 23, 8, 0, 0), reference_date=ref_date
+            )
+        )
+
+    def test_is_offered_slot_excludes_busy_slots(self):
+        """The membership test reuses the grid availability math."""
+        self.env["calendar.event"].create(
+            {
+                "name": "Blocking Meeting",
+                "start": datetime.datetime(2023, 10, 23, 10, 0, 0),
+                "stop": datetime.datetime(2023, 10, 23, 11, 0, 0),
+                "partner_ids": [(4, self.user.partner_id.id)],
+            }
+        )
+        ref_date = datetime.date(2023, 10, 23)
+        self.assertFalse(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 23, 10, 0, 0), reference_date=ref_date
+            )
+        )
+        self.assertTrue(
+            self.appointment_type._is_offered_slot(
+                datetime.datetime(2023, 10, 23, 11, 0, 0), reference_date=ref_date
+            )
+        )
+
+    def test_is_slot_available_any_staff_free_semantics(self):
+        """_is_slot_available must match the grid's ANY-staff-free semantics."""
+        self.appointment_type.write({"staff_user_ids": [(4, self.user2.id)]})
+        start_dt = datetime.datetime(2023, 10, 23, 10, 0, 0)
+        end_dt = start_dt + datetime.timedelta(hours=1)
+
+        # Staff #1 busy, staff #2 free -> still bookable
+        self.env["calendar.event"].create(
+            {
+                "name": "Busy Meeting",
+                "start": start_dt,
+                "stop": end_dt,
+                "partner_ids": [(4, self.user.partner_id.id)],
+            }
+        )
+        self.assertTrue(
+            self.appointment_type._is_slot_available(start_dt, end_dt),
+            "Slot must stay bookable while at least one staff member is free",
+        )
+
+        # Block staff #2 as well -> all staff busy -> not bookable
+        self.env["calendar.event"].create(
+            {
+                "name": "Busy Meeting 2",
+                "start": start_dt,
+                "stop": end_dt,
+                "partner_ids": [(4, self.user2.partner_id.id)],
+            }
+        )
+        self.assertFalse(
+            self.appointment_type._is_slot_available(start_dt, end_dt),
+            "Slot must not be bookable when every staff member is busy",
+        )
+
 
 class TestAppointmentSecurity(TransactionCase):
     """Verify record rules and the staff-self-only constraint."""
@@ -443,3 +539,54 @@ class TestAppointmentEventRestriction(TransactionCase):
             )
         with self.env.with_user(self.user_a), self.assertRaises(UserError):
             event.write({"name": "Hackeada"})
+
+
+class TestAppointmentSlotHourConstraints(TransactionCase):
+    """agendame.slot hour ranges must satisfy 0 <= start < end <= 24."""
+
+    def setUp(self):
+        super().setUp()
+        self.appointment_type = self.env["agendame.type"].create(
+            {
+                "name": "Slot Constraint Agenda",
+                "appointment_duration": 1.0,
+                "staff_user_ids": [(4, self.env.user.id)],
+            }
+        )
+
+    def _slot_vals(self, start_hour, end_hour):
+        return {
+            "agendame_type_id": self.appointment_type.id,
+            "weekday": "1",
+            "start_hour": start_hour,
+            "end_hour": end_hour,
+        }
+
+    def test_valid_hours_accepted(self):
+        """Boundary values 0.0/24.0 and regular ranges are accepted."""
+        slot = self.env["agendame.slot"].create(self._slot_vals(0.0, 24.0))
+        self.assertTrue(slot.exists())
+        slot.write({"start_hour": 9.0, "end_hour": 17.5})
+
+    def test_start_hour_above_24_rejected(self):
+        """Hours >= 24.5 would crash datetime.time() in slot generation."""
+        with self.assertRaises(ValidationError):
+            self.env["agendame.slot"].create(self._slot_vals(24.5, 25.0))
+
+    def test_hours_out_of_range_rejected(self):
+        with self.assertRaises(ValidationError):
+            self.env["agendame.slot"].create(self._slot_vals(-1.0, 12.0))
+        with self.assertRaises(ValidationError):
+            self.env["agendame.slot"].create(self._slot_vals(9.0, 24.5))
+
+    def test_inverted_hours_rejected(self):
+        """start >= end would silently yield zero slots."""
+        with self.assertRaises(ValidationError):
+            self.env["agendame.slot"].create(self._slot_vals(18.0, 9.0))
+        with self.assertRaises(ValidationError):
+            self.env["agendame.slot"].create(self._slot_vals(10.0, 10.0))
+
+    def test_write_invalid_hours_rejected(self):
+        slot = self.env["agendame.slot"].create(self._slot_vals(9.0, 17.0))
+        with self.assertRaises(ValidationError):
+            slot.write({"end_hour": 9.0})

@@ -49,8 +49,8 @@ Addon para Odoo que agrega una página pública de reservas a tu sitio web: los 
 
 - `__manifest__.py` — definición del addon.
 - `__init__.py` — post_init_hook que provisiona agendas por defecto.
-- `models/agendame_type.py` — modelo principal: tipos de cita y generación de horarios disponibles.
-- `models/agendame_slot.py` — franjas horarias de disponibilidad por día de la semana.
+- `models/appointment_type.py` — modelo principal: tipos de cita y generación de horarios disponibles.
+- `models/appointment_slot.py` — franjas horarias de disponibilidad por día de la semana.
 - `models/calendar_event.py` — extensión del evento de calendario y restricciones de propiedad.
 - `models/crm_lead.py` — integración con oportunidades CRM (enlace de reserva).
 - `models/res_users.py` — agenda por defecto para usuarios internos nuevos.
