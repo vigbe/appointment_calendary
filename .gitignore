@@ -72,3 +72,5 @@ odoo.conf
 .atl/
 .ruff_cache/
 .vscode/
+# Local agent runtime state
+.codegraph/
