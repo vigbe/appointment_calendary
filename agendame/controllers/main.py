@@ -51,14 +51,16 @@ class AppointmentController(http.Controller):
                 grouped_slots[date_key] = []
             grouped_slots[date_key].append(slot_localized)
 
-        # Preparamos lista de países Latam (puedes ajustar esta lista)
-        # Priorizamos Chile (CL) y luego los más comunes de Latam
-        latam_codes = ["CL", "AR", "MX", "CO", "PE", "VE", "EC", "BO", "UY", "PY", "BR"]
-        countries = (
-            request.env["res.country"].sudo().search([("code", "in", latam_codes)])
+        # Paises activos en Odoo, priorizando el pais de la compania
+        default_country = (
+            request.env.company.country_id
+            or request.env["res.country"].sudo().search([], limit=1)
         )
-        # Ordenamos para que Chile esté primero si existe
-        countries = sorted(countries, key=lambda c: 0 if c.code == "CL" else 1)
+        countries = request.env["res.country"].sudo().search([])
+        countries = sorted(
+            countries,
+            key=lambda c: (0 if c.id == default_country.id else 1, c.name),
+        )
 
         return request.render(
             "agendame.appointment_details",
@@ -66,6 +68,7 @@ class AppointmentController(http.Controller):
                 "appointment_type": appointment_type,
                 "grouped_slots": grouped_slots,
                 "countries": countries,
+                "default_country": default_country,
                 "days_es": {
                     "Mon": "Lun",
                     "Tue": "Mar",
