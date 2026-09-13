@@ -1,3 +1,5 @@
+# pyright: reportMissingImports=false
+# (odoo framework imports resolve only inside the Odoo runtime/container)
 import datetime
 
 from odoo.exceptions import AccessError, UserError, ValidationError
@@ -7,7 +9,13 @@ from odoo.tests.common import TransactionCase, new_test_user
 class TestAppointmentBooking(TransactionCase):
     def setUp(self):
         super().setUp()
-        self.user = self.env.user
+        # SUPERUSER (__system__) is archived (active=False) on Odoo 16-19 and
+        # the ORM drops inactive records from m2m link commands (strict on 19,
+        # silently emptying staff_user_ids and tripping the staff constraint).
+        # Use an active internal test user as the primary staff member.
+        self.user = new_test_user(
+            self.env, login="testuser1", groups="base.group_user"
+        )
         self.user2 = self.env["res.users"].create(
             {
                 "name": "Test User 2",
