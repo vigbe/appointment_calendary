@@ -32,7 +32,7 @@ class CalendarEvent(models.Model):
     # administradores (base.group_system) estan exentos, por lo que el
     # booking web no se ve afectado.
     # ------------------------------------------------------------------
-    @api.constrains("user_id", "partner_ids", "agendame_type_id")
+    @api.constrains("user_id", "partner_ids", "attendee_ids", "agendame_type_id")
     def _check_appointment_self_only(self):
         if self.env.su or self.env.user.has_group("base.group_system"):
             return

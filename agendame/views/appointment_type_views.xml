@@ -33,11 +33,11 @@
                     <notebook>
                         <page string="Horarios Disponibles" name="slots">
                             <field name="slot_ids">
-                                <list editable="bottom">
+                                <tree editable="bottom">
                                     <field name="weekday"/>
                                     <field name="start_hour" widget="float_time"/>
                                     <field name="end_hour" widget="float_time"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -55,11 +55,11 @@
         <field name="name">agendame.type.view.list</field>
         <field name="model">agendame.type</field>
         <field name="arch" type="xml">
-            <list string="Tipos de Cita">
+            <tree string="Tipos de Cita">
                 <field name="name"/>
                 <field name="appointment_duration" widget="float_time"/>
                 <field name="active"/>
-            </list>
+            </tree>
         </field>
     </record>
 
