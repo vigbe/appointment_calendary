@@ -351,14 +351,21 @@ class TestAppointmentSecurity(TransactionCase):
 
     def test_constraint_user_cannot_assign_other_staff(self):
         """A non-admin user cannot create an agenda with someone else on staff."""
-        with as_user(self, self.user_a), self.assertRaises((ValidationError, AccessError)):
-            self.env["agendame.type"].create(
-                {
-                    "name": "Agenda de otro",
-                    "appointment_duration": 1.0,
-                    "staff_user_ids": [(4, self.user_b.id)],
-                }
-            )
+        with as_user(self, self.user_a):
+            try:
+                self.env["agendame.type"].create(
+                    {
+                        "name": "Agenda de otro",
+                        "appointment_duration": 1.0,
+                        "staff_user_ids": [(4, self.user_b.id)],
+                    }
+                )
+            except (ValidationError, AccessError):
+                # Expected: the staff constraint (ValidationError) or the
+                # own-agenda record rule (AccessError) — version-dependent.
+                pass
+            else:
+                self.fail("Non-admin assignment of another staff must be rejected")
 
     def test_constraint_user_can_assign_self(self):
         """A non-admin user CAN create an agenda with themselves as staff."""
