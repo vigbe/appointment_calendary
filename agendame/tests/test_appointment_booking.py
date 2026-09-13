@@ -1,9 +1,26 @@
 # pyright: reportMissingImports=false
 # (odoo framework imports resolve only inside the Odoo runtime/container)
 import datetime
+from contextlib import contextmanager
 
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests.common import TransactionCase, new_test_user
+
+
+@contextmanager
+def as_user(test, user):
+    """Run a test block with ``test.env`` switched to another user.
+
+    Portable replacement for ``with env.with_user(...)``: Environment is
+    not a context manager and with_user() was removed in Odoo 18.
+    """
+    old_env = test.env
+    test.env = test.env(user=user)
+    try:
+        yield
+    finally:
+        test.env = old_env
+
 
 
 class TestAppointmentBooking(TransactionCase):
@@ -334,7 +351,7 @@ class TestAppointmentSecurity(TransactionCase):
 
     def test_constraint_user_cannot_assign_other_staff(self):
         """A non-admin user cannot create an agenda with someone else on staff."""
-        with self.env.with_user(self.user_a), self.assertRaises(ValidationError):
+        with as_user(self, self.user_a), self.assertRaises(ValidationError):
             self.env["agendame.type"].create(
                 {
                     "name": "Agenda de otro",
@@ -345,7 +362,7 @@ class TestAppointmentSecurity(TransactionCase):
 
     def test_constraint_user_can_assign_self(self):
         """A non-admin user CAN create an agenda with themselves as staff."""
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             agenda = self.env["agendame.type"].create(
                 {
                     "name": "Mi Agenda",
@@ -356,7 +373,7 @@ class TestAppointmentSecurity(TransactionCase):
 
     def test_record_rule_user_sees_only_own(self):
         """User A creates an agenda → only visible to A, not B."""
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             agenda_a = self.env["agendame.type"].create(
                 {
                     "name": "Agenda A",
@@ -365,7 +382,7 @@ class TestAppointmentSecurity(TransactionCase):
             )
 
         # User B: search should NOT return A's agenda
-        with self.env.with_user(self.user_b):
+        with as_user(self, self.user_b):
             visible = self.env["agendame.type"].search(
                 [
                     ("id", "=", agenda_a.id),
@@ -374,7 +391,7 @@ class TestAppointmentSecurity(TransactionCase):
             self.assertFalse(visible, "User B should NOT see User A's agenda")
 
         # User A: search SHOULD return their own agenda
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             visible = self.env["agendame.type"].search(
                 [
                     ("id", "=", agenda_a.id),
@@ -384,14 +401,14 @@ class TestAppointmentSecurity(TransactionCase):
 
     def test_admin_sees_all_agendas(self):
         """Admin can see agendas from any user."""
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             agenda_a = self.env["agendame.type"].create(
                 {
                     "name": "Agenda A",
                     "appointment_duration": 1.0,
                 }
             )
-        with self.env.with_user(self.user_b):
+        with as_user(self, self.user_b):
             agenda_b = self.env["agendame.type"].create(
                 {
                     "name": "Agenda B",
@@ -399,14 +416,14 @@ class TestAppointmentSecurity(TransactionCase):
                 }
             )
 
-        with self.env.with_user(self.user_admin):
+        with as_user(self, self.user_admin):
             all_visible = self.env["agendame.type"].search([])
             self.assertIn(agenda_a, all_visible)
             self.assertIn(agenda_b, all_visible)
 
     def test_admin_can_create_for_others(self):
         """Admin can create an agenda with any staff."""
-        with self.env.with_user(self.user_admin):
+        with as_user(self, self.user_admin):
             agenda = self.env["agendame.type"].create(
                 {
                     "name": "Agenda Admin",
@@ -421,26 +438,26 @@ class TestAppointmentSecurity(TransactionCase):
 
     def test_user_cannot_delete_own_agenda(self):
         """Non-admin users cannot unlink their own agenda (ACL restriction)."""
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             agenda = self.env["agendame.type"].create(
                 {
                     "name": "Agenda a borrar",
                     "appointment_duration": 1.0,
                 }
             )
-        with self.env.with_user(self.user_a), self.assertRaises(AccessError):
+        with as_user(self, self.user_a), self.assertRaises(AccessError):
             agenda.unlink()
 
     def test_admin_can_delete_any_agenda(self):
         """Admin can unlink any agenda."""
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             agenda = self.env["agendame.type"].create(
                 {
                     "name": "Agenda a borrar por admin",
                     "appointment_duration": 1.0,
                 }
             )
-            with self.env.with_user(self.user_admin):
+            with as_user(self, self.user_admin):
                 agenda.unlink()
                 self.assertFalse(agenda.exists())
 
@@ -460,7 +477,7 @@ class TestAppointmentEventRestriction(TransactionCase):
         )
 
         # Appointment types created by admin, each with its own staff user.
-        with cls.env.with_user(cls.admin):
+        with as_user(cls, cls.admin):
             cls.appointment_type_a = cls.env["agendame.type"].create(
                 {
                     "name": "Agenda A",
@@ -486,7 +503,7 @@ class TestAppointmentEventRestriction(TransactionCase):
 
     def test_user_can_create_own_appointment(self):
         """A user can create a module appointment with only themselves."""
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             event = self.env["calendar.event"].create(
                 self._event_vals(self.appointment_type_a)
             )
@@ -496,7 +513,7 @@ class TestAppointmentEventRestriction(TransactionCase):
         """Adding oneself as attendee is allowed."""
         vals = self._event_vals(self.appointment_type_a)
         vals["partner_ids"] = [(4, self.user_a.partner_id.id)]
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             event = self.env["calendar.event"].create(vals)
             self.assertIn(self.user_a.partner_id, event.partner_ids)
 
@@ -504,37 +521,37 @@ class TestAppointmentEventRestriction(TransactionCase):
         """Adding another person (client or peer) as attendee is blocked."""
         vals = self._event_vals(self.appointment_type_a)
         vals["partner_ids"] = [(4, self.user_b.partner_id.id)]
-        with self.env.with_user(self.user_a), self.assertRaises(ValidationError):
+        with as_user(self, self.user_a), self.assertRaises(ValidationError):
             self.env["calendar.event"].create(vals)
 
     def test_user_cannot_set_other_organizer(self):
         """Setting another user as organizer is blocked."""
         vals = self._event_vals(self.appointment_type_a)
         vals["user_id"] = self.user_b.id
-        with self.env.with_user(self.user_a), self.assertRaises(ValidationError):
+        with as_user(self, self.user_a), self.assertRaises(ValidationError):
             self.env["calendar.event"].create(vals)
 
     def test_user_cannot_add_other_attendee_via_write(self):
         """The constraint also applies when editing an existing appointment."""
-        with self.env.with_user(self.user_a):
+        with as_user(self, self.user_a):
             event = self.env["calendar.event"].create(
                 self._event_vals(self.appointment_type_a)
             )
-        with self.env.with_user(self.user_a), self.assertRaises(ValidationError):
+        with as_user(self, self.user_a), self.assertRaises(ValidationError):
             event.write({"partner_ids": [(4, self.user_b.partner_id.id)]})
 
     def test_admin_can_add_others(self):
         """Admins are exempt and can add anyone."""
         vals = self._event_vals(self.appointment_type_a)
         vals["partner_ids"] = [(4, self.user_b.partner_id.id)]
-        with self.env.with_user(self.admin):
+        with as_user(self, self.admin):
             event = self.env["calendar.event"].create(vals)
             self.assertIn(self.user_b.partner_id, event.partner_ids)
 
     def test_attendee_cannot_edit_other_organizer_appointment(self):
         """An attendee (not organizer) cannot edit the appointment; Odoo's native
         calendar rule allows the write, so the ownership override must block it."""
-        with self.env.with_user(self.admin):
+        with as_user(self, self.admin):
             event = self.env["calendar.event"].create(
                 {
                     "name": "Cita de B",
@@ -545,7 +562,7 @@ class TestAppointmentEventRestriction(TransactionCase):
                     "partner_ids": [(4, self.user_a.partner_id.id)],  # a is attendee
                 }
             )
-        with self.env.with_user(self.user_a), self.assertRaises(UserError):
+        with as_user(self, self.user_a), self.assertRaises(UserError):
             event.write({"name": "Hackeada"})
 
 
@@ -558,7 +575,7 @@ class TestAppointmentSlotHourConstraints(TransactionCase):
             {
                 "name": "Slot Constraint Agenda",
                 "appointment_duration": 1.0,
-                "staff_user_ids": [(4, self.env.user.id)],
+                "staff_user_ids": [(4, self.env.ref("base.user_admin").id)],
             }
         )
 
