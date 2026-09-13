@@ -7,7 +7,12 @@ from odoo.tests.common import TransactionCase, new_test_user
 class TestAppointmentBooking(TransactionCase):
     def setUp(self):
         super().setUp()
-        self.user = self.env.user
+        # SUPERUSER (__system__) is archived (active=False) on Odoo 16-19 and
+        # the ORM drops inactive records from m2m link commands; use an active
+        # internal test user as the primary staff member instead.
+        self.user = new_test_user(
+            self.env, login="testuser1", groups="base.group_user"
+        )
         self.user2 = self.env["res.users"].create(
             {
                 "name": "Test User 2",
