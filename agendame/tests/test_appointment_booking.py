@@ -22,7 +22,6 @@ def as_user(test, user):
         test.env = old_env
 
 
-
 class TestAppointmentBooking(TransactionCase):
     def setUp(self):
         super().setUp()
@@ -30,9 +29,7 @@ class TestAppointmentBooking(TransactionCase):
         # the ORM drops inactive records from m2m link commands (strict on 19,
         # silently emptying staff_user_ids and tripping the staff constraint).
         # Use an active internal test user as the primary staff member.
-        self.user = new_test_user(
-            self.env, login="testuser1", groups="base.group_user"
-        )
+        self.user = new_test_user(self.env, login="testuser1", groups="base.group_user")
         self.user2 = self.env["res.users"].create(
             {
                 "name": "Test User 2",
