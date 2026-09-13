@@ -7,12 +7,22 @@ __all__ = ["controllers", "models"]
 _logger = logging.getLogger(__name__)
 
 
-def _create_default_appointment_types(env):
+def _create_default_appointment_types(arg, registry=None):
     """post_init_hook: create a default appointment agenda for every internal user.
 
     Only users belonging to the internal group (base.group_user) get a default
     agenda. Existing agendas are not duplicated.
     """
+
+    # Dual signature: Odoo <= 16 calls hooks as (cr, registry) while
+    # Odoo 17+ passes the environment only.
+    if registry is not None:
+        from odoo import SUPERUSER_ID
+        from odoo.api import Environment
+
+        env = Environment(arg, SUPERUSER_ID, {})
+    else:
+        env = arg
     AppointmentType = env["agendame.type"]
     group_user = env.ref("base.group_user", raise_if_not_found=False)
     if not group_user:
