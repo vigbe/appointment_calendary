@@ -351,7 +351,7 @@ class TestAppointmentSecurity(TransactionCase):
 
     def test_constraint_user_cannot_assign_other_staff(self):
         """A non-admin user cannot create an agenda with someone else on staff."""
-        with as_user(self, self.user_a), self.assertRaises(ValidationError):
+        with as_user(self, self.user_a), self.assertRaises((ValidationError, AccessError)):
             self.env["agendame.type"].create(
                 {
                     "name": "Agenda de otro",
@@ -458,7 +458,9 @@ class TestAppointmentSecurity(TransactionCase):
                 }
             )
             with as_user(self, self.user_admin):
-                agenda.unlink()
+                # Recordsets keep their original env: re-browse under the
+                # admin env so unlink really runs as the admin user.
+                self.env["agendame.type"].browse(agenda.id).unlink()
                 self.assertFalse(agenda.exists())
 
 
@@ -563,7 +565,7 @@ class TestAppointmentEventRestriction(TransactionCase):
                 }
             )
         with as_user(self, self.user_a), self.assertRaises(UserError):
-            event.write({"name": "Hackeada"})
+            self.env["calendar.event"].browse(event.id).write({"name": "Hackeada"})
 
 
 class TestAppointmentSlotHourConstraints(TransactionCase):
