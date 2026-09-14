@@ -34,6 +34,4 @@
     "auto_install": False,
     "post_init_hook": "_create_default_appointment_types",
     "license": "LGPL-3",
-    "price": 9.99,
-    "currency": "USD",
 }
