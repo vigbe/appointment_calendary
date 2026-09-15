@@ -253,36 +253,40 @@
                                                     <label class="form-label h6 fw-bold">Nombre Completo</label>
                                                     <input type="text" class="form-control lux-form-control shadow-none" name="name" required="1" placeholder="Ej: Juan Pérez"/>
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-4">
-                                                        <label class="form-label h6 fw-bold">RUT / Identificación</label>
-                                                        <input type="text" class="form-control lux-form-control shadow-none" id="rut_input" name="rut" required="1" placeholder="12.345.678-9"/>
-                                                        <div id="rut_error" class="text-danger small mt-1" style="display: none;">RUT inválido</div>
-                                                    </div>
-                                                    <div class="col-md-6 mb-4">
-                                                        <label class="form-label h6 fw-bold">Email</label>
-                                                        <input type="email" class="form-control lux-form-control shadow-none" name="email" required="1" placeholder="ejemplo@correo.com"/>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-md-6 mb-4">
-                                                        <label class="form-label h6 fw-bold">País</label>
-                                                        <select class="form-select lux-form-control shadow-none" name="country_id" id="country_selector" required="1">
-                                                            <t t-foreach="countries" t-as="country">
-                                                                <option t-att-value="country.id" t-att-data-code="country.phone_code" t-att-selected="country.code == 'CL'">
-                                                                    <t t-esc="country.name"/> (+<t t-esc="country.phone_code"/>)
-                                                                </option>
-                                                            </t>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6 mb-4">
-                                                        <label class="form-label h6 fw-bold">Teléfono móvil</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text lux-form-control border-end-0 bg-light" id="phone_prefix">+56</span>
-                                                            <input type="tel" class="form-control lux-form-control shadow-none" id="phone_input" name="phone" required="1" placeholder="9 1234 5678"/>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                                 <div class="row">
+                                                     <div class="col-md-6 mb-4">
+                                                         <label id="vat_label" class="form-label h6 fw-bold">
+                                                             <t t-if="default_country.code == 'CL'">RUT</t>
+                                                             <t t-else="">Identificación Fiscal (Opcional)</t>
+                                                         </label>
+                                                         <input type="text" class="form-control lux-form-control shadow-none" id="rut_input" name="rut"
+                                                             t-att-placeholder="'12.345.678-9' if default_country.code == 'CL' else 'Ej: RFC, CIF, Tax ID'"/>
+                                                         <div id="rut_error" class="text-danger small mt-1" style="display: none;">RUT inválido</div>
+                                                     </div>
+                                                     <div class="col-md-6 mb-4">
+                                                         <label class="form-label h6 fw-bold">Email</label>
+                                                         <input type="email" class="form-control lux-form-control shadow-none" name="email" required="1" placeholder="ejemplo@correo.com"/>
+                                                     </div>
+                                                 </div>
+                                                 <div class="row">
+                                                     <div class="col-md-6 mb-4">
+                                                         <label class="form-label h6 fw-bold">País</label>
+                                                         <select class="form-select lux-form-control shadow-none" name="country_id" id="country_selector" required="1">
+                                                             <t t-foreach="countries" t-as="country">
+                                                                 <option t-att-value="country.id" t-att-data-code="country.phone_code" t-att-data-country-code="country.code" t-att-selected="country.id == default_country.id">
+                                                                     <t t-esc="country.name"/> (+<t t-esc="country.phone_code"/>)
+                                                                 </option>
+                                                             </t>
+                                                         </select>
+                                                     </div>
+                                                     <div class="col-md-6 mb-4">
+                                                         <label class="form-label h6 fw-bold">Teléfono móvil</label>
+                                                         <div class="input-group">
+                                                             <span class="input-group-text lux-form-control border-end-0 bg-light" id="phone_prefix">+<t t-esc="default_country.phone_code or ''"/></span>
+                                                             <input type="tel" class="form-control lux-form-control shadow-none" id="phone_input" name="phone" required="1" placeholder="Número de teléfono"/>
+                                                         </div>
+                                                     </div>
+                                                 </div>
                                                 <button type="submit" id="submit_button" class="btn lux-btn-primary btn-lg w-100 shadow-lg py-3 h4 mt-3">
                                                     Confirmar Cita <i class="fa fa-arrow-right ms-2"/>
                                                 </button>
@@ -330,18 +334,32 @@
                     });
                 });
 
-                // --- RUT Validator &amp; Country/Phone UI ---
+                // --- Tax ID / RUT Validator &amp; Country/Phone UI ---
                 const rutInput = document.getElementById('rut_input');
                 const rutError = document.getElementById('rut_error');
+                const vatLabel = document.getElementById('vat_label');
                 const countrySelector = document.getElementById('country_selector');
                 const phonePrefix = document.getElementById('phone_prefix');
                 const form = document.getElementById('appointment_form');
                 const submitBtn = document.getElementById('submit_button');
 
-                countrySelector.addEventListener('change', function() {
-                    const option = this.options[this.selectedIndex];
-                    phonePrefix.textContent = '+' + option.dataset.code;
-                });
+                function updateCountryUI() {
+                    const option = countrySelector.options[countrySelector.selectedIndex];
+                    const countryCode = option.dataset.countryCode;
+                    phonePrefix.textContent = '+' + (option.dataset.code || '');
+
+                    if (countryCode === 'CL') {
+                        if (vatLabel) vatLabel.textContent = 'RUT';
+                        rutInput.placeholder = '12.345.678-9';
+                    } else {
+                        if (vatLabel) vatLabel.textContent = 'Identificación Fiscal (Opcional)';
+                        rutInput.placeholder = 'Ej: RFC, CIF, Tax ID';
+                        rutError.style.display = 'none';
+                        rutInput.classList.remove('is-invalid');
+                    }
+                }
+
+                countrySelector.addEventListener('change', updateCountryUI);
 
                 function validateRut(rut) {
                     if (!rut || rut.length &lt; 3) return false;
@@ -363,15 +381,21 @@
                 }
 
                 rutInput.addEventListener('input', function() {
-                    const valid = validateRut(this.value);
-                    rutError.style.display = valid || this.value === '' ? 'none' : 'block';
-                    this.classList.toggle('is-invalid', !valid &amp;&amp; this.value !== '');
+                    const option = countrySelector.options[countrySelector.selectedIndex];
+                    if (option &amp;&amp; option.dataset.countryCode === 'CL') {
+                        const valid = validateRut(this.value);
+                        rutError.style.display = valid || this.value === '' ? 'none' : 'block';
+                        this.classList.toggle('is-invalid', !valid &amp;&amp; this.value !== '');
+                    } else {
+                        rutError.style.display = 'none';
+                        this.classList.remove('is-invalid');
+                    }
                 });
 
                 form.addEventListener('submit', function(e) {
-                    // Final RUT validation on submit (only if country is Chile)
                     const option = countrySelector.options[countrySelector.selectedIndex];
-                    if (option.text.indexOf('Chile') !== -1 &amp;&amp; !validateRut(rutInput.value)) {
+                    // RUT validation on submit only if country is Chile and value was entered
+                    if (option &amp;&amp; option.dataset.countryCode === 'CL' &amp;&amp; rutInput.value.trim() !== '' &amp;&amp; !validateRut(rutInput.value)) {
                         e.preventDefault();
                         rutInput.focus();
                         rutError.style.display = 'block';
@@ -380,7 +404,7 @@
 
                     // Disable button to prevent double submit
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i> Procesando...';
+                    submitBtn.innerHTML = '&lt;i class="fa fa-spinner fa-spin me-2"&gt;&lt;/i&gt; Procesando...';
                 });
             </script>
         </t>
