@@ -11,6 +11,7 @@ required.
 
 | Branch | Odoo series | Notes |
 |--------|-------------|-------|
+| `20.0` | 20.0 | First public port (20.0.1.0.0) |
 | `main` | 19.0 | Default branch, identical to `19.0` |
 | `19.0` | 19.0 | First public release (19.0.1.0.0) |
 | `18.0` | 18.0 | First public port (18.0.1.0.0) |

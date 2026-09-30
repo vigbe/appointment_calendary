@@ -16,7 +16,7 @@
     "support": "contacto@vicbas.com",
     "maintainer": "Victor Bastías Escobar",
     "category": "Sales/CRM",
-    "version": "19.0.1.0.0",
+    "version": "20.0.1.0.0",
     "depends": ["base", "crm", "calendar", "website", "mail"],
     "data": [
         "security/ir.model.access.csv",
