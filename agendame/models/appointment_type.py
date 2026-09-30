@@ -34,16 +34,6 @@ class AppointmentType(models.Model):
         default=lambda self: self.env.user.tz or "UTC",
         tracking=True,
     )
-    event_videocall_source = fields.Selection(
-        [
-            ("discuss", "Odoo Discuss"),
-            ("google_meet", "Google Meet"),
-            ("zoom", "Zoom"),
-        ],
-        string="Fuente de Videollamada",
-        help="Fuente del enlace de videollamada para la reunión.",
-    )
-
     image_1920 = fields.Image(string="Imagen", max_width=1920, max_height=1920)
 
     color_primary = fields.Char(

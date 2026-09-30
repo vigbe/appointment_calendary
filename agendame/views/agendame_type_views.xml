@@ -20,7 +20,6 @@
                             <field name="image_1920" widget="image" class="oe_avatar"/>
                             <field name="appointment_duration" widget="float_time"/>
                             <field name="appointment_tz"/>
-                            <field name="event_videocall_source"/>
                             <field name="max_schedule_days"/>
                             <field name="active"/>
                         </group>

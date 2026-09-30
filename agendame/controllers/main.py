@@ -237,7 +237,10 @@ class AppointmentController(http.Controller):
                     "partner_ids": partner_ids,
                     "agendame_type_id": appointment_type.id,
                     "agendame_status": "booked",
-                    "videocall_source": appointment_type.event_videocall_source,
+                    # Odoo 20: calendar.event.videocall_source became a computed
+                    # field (discuss/custom only; Google Meet and Zoom left the
+                    # core), so third-party modules can no longer set it at
+                    # creation. Videocalls are managed by the event form itself.
                     "client_rut": rut,
                     "client_country_id": country_id,
                 }
